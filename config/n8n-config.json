@@ -1,0 +1,39 @@
+{
+  "n8n": {
+    "enabled": true,
+    "instanceUrl": "http://localhost:5678",
+    "webhookPath": "/webhook/openclaw",
+    "apiKey": {
+      "source": "env",
+      "envVar": "N8N_API_KEY"
+    },
+    "workflows": {
+      "githubSync": {
+        "id": "github-sync-workflow",
+        "trigger": "openclaw-github-event",
+        "description": "同步GitHub事件到OpenClaw"
+      },
+      "openclawAutomation": {
+        "id": "openclaw-automation",
+        "trigger": "openclaw-command",
+        "description": "執行OpenClaw自動化任務"
+      },
+      "monitoring": {
+        "id": "openclaw-monitoring",
+        "trigger": "schedule",
+        "schedule": "*/30 * * * *",
+        "description": "監控OpenClaw狀態和用量"
+      }
+    },
+    "integrations": {
+      "github": {
+        "enabled": true,
+        "events": ["push", "pull_request", "issues"]
+      },
+      "openclaw": {
+        "enabled": true,
+        "commands": ["execute", "monitor", "backup"]
+      }
+    }
+  }
+}

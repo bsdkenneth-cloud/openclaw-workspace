@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "self-improving-agent": {
+      "version": "3.0.13",
+      "installedAt": 1776255157250
+    },
+    "openclaw-tavily-search": {
+      "version": "0.1.0",
+      "installedAt": 1776255181591
+    },
+    "summarize-pro": {
+      "version": "1.0.0",
+      "installedAt": 1776255278478
+    },
+    "nano-pdf": {
+      "version": "1.0.0",
+      "installedAt": 1776255302620
+    },
+    "auto-updater": {
+      "version": "1.0.0",
+      "installedAt": 1776255422101
+    }
+  }
+}

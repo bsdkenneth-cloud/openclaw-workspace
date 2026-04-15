@@ -1,0 +1,26 @@
+{
+  "github": {
+    "enabled": true,
+    "personalAccessToken": {
+      "source": "env",
+      "envVar": "GITHUB_TOKEN"
+    },
+    "defaultUser": "Kenneth",
+    "defaultEmail": "bsd.kenneth@gmail.com",
+    "repositories": {
+      "workspace": "https://github.com/bsdke/openclaw-workspace",
+      "config": "https://github.com/bsdke/openclaw-config",
+      "skills": "https://github.com/bsdke/openclaw-skills"
+    },
+    "automation": {
+      "autoCommit": true,
+      "autoPush": true,
+      "commitMessageTemplate": "OpenClaw update: {timestamp}",
+      "branch": "main"
+    },
+    "webhooks": {
+      "enabled": true,
+      "events": ["push", "pull_request", "issues"]
+    }
+  }
+}

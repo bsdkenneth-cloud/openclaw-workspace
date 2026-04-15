@@ -1,0 +1,63 @@
+# OpenClaw工作空間忽略檔案
+
+# 依賴項
+node_modules/
+.npm/
+.yarn/
+
+# 環境變數和敏感資料
+.env
+.env.local
+.env.*.local
+secrets/
+*.key
+*.pem
+*.crt
+
+# 日誌檔案
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 運行時資料
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+temp/
+tmp/
+cache/
+
+# 編輯器設定
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系統檔案
+.openclaw/openclaw.json  # 主配置（包含敏感資訊）
+.openclaw/gateway.cmd
+.openclaw/agents/
+.openclaw/logs/
+
+# 媒體檔案
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp3
+*.mp4
+*.wav
+
+# 備份檔案
+backup-*
+*-backup-*
+startup-backup-*
+
+# WhatsApp QR碼
+whatsapp_qr*.png
+
+# 暫時檔案
+.clawhub/cache/
