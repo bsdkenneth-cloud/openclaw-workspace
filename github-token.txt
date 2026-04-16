@@ -1,0 +1,16 @@
+# 請將新的 GitHub Token 貼在這裡
+# 格式：ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# 或：github_pat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# 刪除舊 Token 步驟：
+# 1. 訪問 https://github.com/settings/tokens
+# 2. 找到 OpenClaw-Access Token
+# 3. 點擊垃圾桶圖示刪除
+
+# 建立新 Token 步驟：
+# 1. 點擊 "Generate new token" -> "Generate new token (classic)"
+# 2. 名稱：OpenClaw-Workspace
+# 3. 權限：repo (全選), workflow
+# 4. 複製 Token 並貼在下方
+
+# 請將新 Token 貼在這裡：
