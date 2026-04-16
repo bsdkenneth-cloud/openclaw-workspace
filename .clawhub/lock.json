@@ -20,6 +20,10 @@
     "auto-updater": {
       "version": "1.0.0",
       "installedAt": 1776255422101
+    },
+    "openclaw-backup": {
+      "version": "1.0.0",
+      "installedAt": 1776255902598
     }
   }
 }

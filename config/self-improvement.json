@@ -1,0 +1,174 @@
+{
+  "selfImprovement": {
+    "enabled": true,
+    "schedule": {
+      "dailyAnalysis": "02:00",
+      "weeklyReview": "sunday 03:00",
+      "monthlyOptimization": "first 04:00"
+    },
+    "areas": {
+      "performance": {
+        "enabled": true,
+        "metrics": [
+          "response_time",
+          "throughput",
+          "error_rate",
+          "resource_usage"
+        ],
+        "thresholds": {
+          "response_time": 3.0,
+          "error_rate": 0.05,
+          "memory_usage": 0.8
+        }
+      },
+      "cost": {
+        "enabled": true,
+        "metrics": [
+          "token_usage",
+          "api_calls",
+          "storage_cost"
+        ],
+        "budgets": {
+          "daily": 2.0,
+          "weekly": 10.0,
+          "monthly": 30.0
+        }
+      },
+      "skills": {
+        "enabled": true,
+        "metrics": [
+          "usage_frequency",
+          "success_rate",
+          "user_feedback"
+        ],
+        "optimization": {
+          "auto_disable_unused": true,
+          "auto_update": true,
+          "suggest_alternatives": true
+        }
+      },
+      "configuration": {
+        "enabled": true,
+        "aspects": [
+          "model_selection",
+          "cache_settings",
+          "timeout_values",
+          "concurrency_limits"
+        ]
+      }
+    },
+    "actions": {
+      "automatic": [
+        "adjust_cache_ttl",
+        "switch_model_on_high_cost",
+        "disable_failing_skills",
+        "cleanup_old_logs"
+      ],
+      "suggested": [
+        "optimize_prompt_templates",
+        "add_fallback_models",
+        "implement_retry_logic",
+        "setup_monitoring_alerts"
+      ],
+      "manual": [
+        "change_primary_model",
+        "modify_integration_settings",
+        "update_security_config"
+      ]
+    },
+    "learning": {
+      "enabled": true,
+      "dataSources": [
+        "usage_logs",
+        "error_reports",
+        "user_feedback",
+        "performance_metrics"
+      ],
+      "analysisFrequency": "daily",
+      "improvementCycles": {
+        "short_term": "daily",
+        "medium_term": "weekly",
+        "long_term": "monthly"
+      }
+    },
+    "reporting": {
+      "dailySummary": true,
+      "weeklyReport": true,
+      "monthlyReview": true,
+      "alertChannels": ["webchat", "email"],
+      "format": {
+        "executive": true,
+        "technical": true,
+        "actionable": true
+      }
+    }
+  },
+  "optimizationRules": [
+    {
+      "id": "cost_optimization_1",
+      "name": "高成本自動切換",
+      "condition": "daily_cost > 2.0",
+      "action": "switch_to_ollama",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "id": "performance_optimization_1",
+      "name": "響應時間優化",
+      "condition": "avg_response_time > 3.0",
+      "action": "adjust_concurrency",
+      "priority": "medium",
+      "enabled": true
+    },
+    {
+      "id": "skill_optimization_1",
+      "name": "技能故障處理",
+      "condition": "skill_error_rate > 0.1",
+      "action": "disable_skill",
+      "priority": "high",
+      "enabled": true
+    },
+    {
+      "id": "resource_optimization_1",
+      "name": "記憶體使用優化",
+      "condition": "memory_usage > 0.7",
+      "action": "clear_cache",
+      "priority": "medium",
+      "enabled": true
+    }
+  ],
+  "improvementWorkflow": {
+    "steps": [
+      {
+        "name": "數據收集",
+        "description": "收集性能、成本、使用數據",
+        "frequency": "hourly",
+        "sources": ["logs", "metrics", "user_interactions"]
+      },
+      {
+        "name": "分析識別",
+        "description": "分析數據，識別問題和機會",
+        "frequency": "daily",
+        "methods": ["statistical_analysis", "pattern_recognition", "anomaly_detection"]
+      },
+      {
+        "name": "建議生成",
+        "description": "生成具體的優化建議",
+        "frequency": "daily",
+        "criteria": ["impact", "feasibility", "cost_benefit"]
+      },
+      {
+        "name": "執行優化",
+        "description": "執行自動或建議的優化",
+        "frequency": "as_needed",
+        "types": ["automatic", "suggested", "manual"]
+      },
+      {
+        "name": "評估效果",
+        "description": "評估優化效果，調整策略",
+        "frequency": "weekly",
+        "metrics": ["performance_delta", "cost_savings", "user_satisfaction"]
+      }
+    ]
+  }
+}

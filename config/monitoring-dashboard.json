@@ -1,0 +1,207 @@
+{
+  "monitoringDashboard": {
+    "enabled": true,
+    "refreshInterval": 30000,
+    "sections": {
+      "costMonitoring": {
+        "title": "成本監控",
+        "enabled": true,
+        "widgets": [
+          {
+            "type": "cost_gauge",
+            "title": "今日費用",
+            "metric": "cost.today",
+            "thresholds": {
+              "warning": 1.0,
+              "critical": 2.0
+            },
+            "refresh": 300
+          },
+          {
+            "type": "token_counter",
+            "title": "Token用量",
+            "metrics": ["tokens.input", "tokens.output"],
+            "refresh": 60
+          },
+          {
+            "type": "cost_comparison",
+            "title": "模型成本比較",
+            "metrics": ["cost.deepseek", "cost.ollama", "cost.openai"],
+            "refresh": 3600
+          }
+        ]
+      },
+      "performanceMonitoring": {
+        "title": "性能監控",
+        "enabled": true,
+        "widgets": [
+          {
+            "type": "response_time_chart",
+            "title": "響應時間",
+            "metric": "performance.response_time",
+            "timeRange": "24h",
+            "refresh": 60
+          },
+          {
+            "type": "throughput_counter",
+            "title": "請求吞吐量",
+            "metric": "performance.requests_per_minute",
+            "refresh": 30
+          },
+          {
+            "type": "error_rate_gauge",
+            "title": "錯誤率",
+            "metric": "performance.error_rate",
+            "thresholds": {
+              "warning": 0.03,
+              "critical": 0.05
+            },
+            "refresh": 60
+          }
+        ]
+      },
+      "skillMonitoring": {
+        "title": "技能監控",
+        "enabled": true,
+        "widgets": [
+          {
+            "type": "top_skills",
+            "title": "最常用技能",
+            "metric": "skills.usage_count",
+            "limit": 10,
+            "refresh": 300
+          },
+          {
+            "type": "skill_health",
+            "title": "技能健康狀態",
+            "metrics": ["skills.success_rate", "skills.error_count"],
+            "refresh": 300
+          },
+          {
+            "type": "skill_cost",
+            "title": "技能成本分析",
+            "metric": "skills.cost_per_use",
+            "refresh": 3600
+          }
+        ]
+      },
+      "systemMonitoring": {
+        "title": "系統監控",
+        "enabled": true,
+        "widgets": [
+          {
+            "type": "memory_usage",
+            "title": "記憶體使用",
+            "metric": "system.memory_usage",
+            "thresholds": {
+              "warning": 0.7,
+              "critical": 0.85
+            },
+            "refresh": 30
+          },
+          {
+            "type": "cpu_usage",
+            "title": "CPU使用率",
+            "metric": "system.cpu_usage",
+            "refresh": 30
+          },
+          {
+            "type": "disk_usage",
+            "title": "磁碟使用",
+            "metric": "system.disk_usage",
+            "refresh": 300
+          }
+        ]
+      }
+    },
+    "alerts": {
+      "costAlerts": [
+        {
+          "name": "日費用超標",
+          "condition": "cost.today > 2.0",
+          "severity": "high",
+          "channels": ["webchat", "email"],
+          "cooldown": 3600
+        },
+        {
+          "name": "單次會話費用過高",
+          "condition": "cost.session > 0.5",
+          "severity": "medium",
+          "channels": ["webchat"],
+          "cooldown": 1800
+        }
+      ],
+      "performanceAlerts": [
+        {
+          "name": "響應時間過長",
+          "condition": "performance.avg_response_time > 3.0",
+          "severity": "medium",
+          "channels": ["webchat"],
+          "cooldown": 1800
+        },
+        {
+          "name": "錯誤率過高",
+          "condition": "performance.error_rate > 0.05",
+          "severity": "high",
+          "channels": ["webchat", "email"],
+          "cooldown": 900
+        }
+      ],
+      "systemAlerts": [
+        {
+          "name": "記憶體使用過高",
+          "condition": "system.memory_usage > 0.8",
+          "severity": "medium",
+          "channels": ["webchat"],
+          "cooldown": 1800
+        },
+        {
+          "name": "磁碟空間不足",
+          "condition": "system.disk_free_percent < 0.1",
+          "severity": "high",
+          "channels": ["webchat", "email"],
+          "cooldown": 3600
+        }
+      ]
+    },
+    "reporting": {
+      "dailyReport": {
+        "enabled": true,
+        "time": "09:00",
+        "sections": ["cost", "performance", "skills", "alerts"],
+        "format": "markdown"
+      },
+      "weeklyReport": {
+        "enabled": true,
+        "day": "monday",
+        "time": "10:00",
+        "sections": ["trends", "comparisons", "recommendations"],
+        "format": "markdown"
+      },
+      "monthlyReport": {
+        "enabled": true,
+        "day": "first",
+        "time": "11:00",
+        "sections": ["summary", "insights", "planning"],
+        "format": "pdf"
+      }
+    },
+    "dataRetention": {
+      "metrics": {
+        "high_frequency": "7d",
+        "medium_frequency": "30d",
+        "low_frequency": "90d"
+      },
+      "logs": {
+        "access": "30d",
+        "error": "90d",
+        "audit": "180d"
+      },
+      "reports": {
+        "daily": "30d",
+        "weekly": "90d",
+        "monthly": "365d"
+      }
+    }
+  }
+}

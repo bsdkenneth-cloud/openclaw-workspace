@@ -1,0 +1,130 @@
+{
+  "workflows": {
+    "github-sync": {
+      "name": "GitHub同步工作流程",
+      "description": "同步GitHub事件到OpenClaw",
+      "nodes": [
+        {
+          "name": "GitHub Webhook",
+          "type": "n8n-nodes-base.webhook",
+          "position": [250, 300],
+          "parameters": {
+            "path": "/webhook/github-sync",
+            "responseMode": "responseNode"
+          }
+        },
+        {
+          "name": "解析GitHub事件",
+          "type": "n8n-nodes-base.function",
+          "position": [450, 300],
+          "parameters": {
+            "jsCode": "const event = items[0].json;\nconst eventType = event.headers['x-github-event'];\nconst payload = JSON.parse(event.body);\n\nlet result = {\n  source: 'github',\n  event: eventType,\n  timestamp: new Date().toISOString(),\n  data: {}\n};\n\nswitch(eventType) {\n  case 'push':\n    result.data = {\n      repository: payload.repository.full_name,\n      branch: payload.ref.replace('refs/heads/', ''),\n      commitCount: payload.commits.length,\n      pusher: payload.pusher.name,\n      commits: payload.commits.map(c => ({ \n        id: c.id,\n        message: c.message,\n        author: c.author.name\n      }))\n    };\n    break;\n    \n  case 'pull_request':\n    result.data = {\n      repository: payload.repository.full_name,\n      action: payload.action,\n      prNumber: payload.number,\n      prTitle: payload.pull_request.title,\n      author: payload.sender.login,\n      url: payload.pull_request.html_url\n    };\n    break;\n    \n  case 'issues':\n    result.data = {\n      repository: payload.repository.full_name,\n      action: payload.action,\n      issueNumber: payload.issue.number,\n      issueTitle: payload.issue.title,\n      author: payload.sender.login,\n      body: payload.issue.body\n    };\n    break;\n}\n\nreturn [{ json: result }];"
+          }
+        },
+        {
+          "name": "發送到OpenClaw",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [650, 300],
+          "parameters": {
+            "url": "={{$json.data.repository ? 'http://localhost:18789/api/github/event' : ''}}",
+            "method": "POST",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer 5ef38dca1acb459b7fbb08e630da0b08a49f26cc3520c2f2"
+                },
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "sendBody": true,
+            "bodyParameters": {
+              "parameters": [
+                {
+                  "name": "event",
+                  "value": "={{$json.event}}"
+                },
+                {
+                  "name": "data",
+                  "value": "={{$json.data}}"
+                },
+                {
+                  "name": "timestamp",
+                  "value": "={{$json.timestamp}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "記錄到日誌",
+          "type": "n8n-nodes-base.function",
+          "position": [650, 450],
+          "parameters": {
+            "jsCode": "const event = items[0].json;\nconsole.log(`GitHub事件處理: ${event.event} - ${event.data.repository}`);\nreturn items;"
+          }
+        }
+      ]
+    },
+    
+    "openclaw-automation": {
+      "name": "OpenClaw自動化工作流程",
+      "description": "執行OpenClaw自動化任務",
+      "nodes": [
+        {
+          "name": "排程觸發",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "position": [250, 300],
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "minutes",
+                  "minutesInterval": 30
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "檢查OpenClaw狀態",
+          "type": "n8n-nodes-base.httpRequest",
+          "position": [450, 300],
+          "parameters": {
+            "url": "http://localhost:18789/api/status",
+            "method": "GET",
+            "authentication": "genericCredentialType",
+            "genericAuthType": "httpHeaderAuth",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "Bearer 5ef38dca1acb459b7fbb08e630da0b08a49f26cc3520c2f2"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "分析狀態",
+          "type": "n8n-nodes-base.function",
+          "position": [650, 300],
+          "parameters": {
+            "jsCode": "const status = items[0].json;\nconst now = new Date();\n\n// 檢查用量\nconst inputTokens = status.tokens?.input || 0;\nconst outputTokens = status.tokens?.output || 0;\nconst cost = status.cost || 0;\n\n// 計算每小時用量\nconst hourlyCost = cost / 24;\n\nlet alerts = [];\n\nif (hourlyCost > 0.1) {\n  alerts.push({\n    level: 'warning',\n    message: `每小時費用偏高: $${hourlyCost.toFixed(4)}`,\n    threshold: 0.1\n  });\n}\n\nif (inputTokens > 10000) {\n  alerts.push({\n    level: 'info',\n    message: `輸入tokens使用量: ${inputTokens}`,\n    threshold: 10000\n  });\n}\n\nreturn [{\n  json: {\n    timestamp: now.toISOString(),\n    status: 'healthy',\n    metrics: {\n      inputTokens,\n      outputTokens,\n      cost,\n      hourlyCost\n    },\n    alerts\n  }\n}];"
+          }
+        },
+        {
+          "name": "發送警報",
+          "type": "n8n-nodes-base.if",
+          "position": [850, 300],
+          "parameters": {
+            "conditions": {
+              "string": [
+                {\n                  \"value1\": \"={{$json.alerts.length}}\",\n                  \"operation\": \"larger\",\n                  \"value2\": \"0\"\n                }\n              ]\n            }\n          }\n        },\n        {\n          \"name\": \"發送通知\",\n          \"type\": \"n8n-nodes-base.httpRequest\",\n          \"position\": [1050, 300],\n          \"parameters\": {\n            \"url\": \"http://localhost:18789/api/notify\",\n            \"method\": \"POST\",\n            \"sendBody\": true,\n            \"bodyParameters\": {\n              \"parameters\": [\n                {\n                  \"name\": \"message\",\n                  \"value\": \"={{$json.alerts.map(a => `${a.level}: ${a.message}`).join('\\\\n')}}\"\n                }\n              ]\n            }\n          }\n        }\n      ]\n    },\n    \n    \"self-improvement\": {\n      \"name\": \"自我優化工作流程\",\n      \"description\": \"使用self-improving-agent進行優化\",\n      \"nodes\": [\n        {\n          \"name\": \"每日觸發\",\n          \"type\": \"n8n-nodes-base.scheduleTrigger\",\n          \"position\": [250, 300],\n          \"parameters\": {\n            \"rule\": {\n              \"interval\": [\n                {\n                  \"field\": \"days\",\n                  \"daysInterval\": 1\n                }\n              ],\n              \"hour\": 2,\n              \"minute\": 0\n            }\n          }\n        },\n        {\n          \"name\": \"收集性能數據\",\n          \"type\": \"n8n-nodes-base.function\",\n          \"position\": [450, 300],\n          \"parameters\": {\n            \"jsCode\": \"// 收集過去24小時的數據\\nconst now = new Date();\\nconst yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);\\n\\n// 這裡應該從數據庫或日誌中讀取實際數據\\nconst performanceData = {\\n  period: {\\n    start: yesterday.toISOString(),\\n    end: now.toISOString()\\n  },\\n  metrics: {\\n    totalRequests: 150,\\n    avgResponseTime: 1.2,\\n    errorRate: 0.02,\\n    tokenUsage: {\\n      input: 45000,\\n      output: 12000\\n    },\\n    cost: 0.015\\n  },\\n  issues: [\\n    {\\n      type: 'high_latency',\\n      count: 3,\\n      description: '某些請求響應時間超過5秒'\\n    },\\n    {\\n      type: 'skill_error',\\n      count: 2,\\n      description: '兩個skills出現錯誤'\\n    }\\n  ]\\n};\\n\\nreturn [{ json: performanceData }];\"\n          }\n        },\n        {\n          \"name\": \"調用Self-Improving Agent\",\n          \"type\": \"n8n-nodes-base.httpRequest\",\n          \"position\": [650, 300],\n          \"parameters\": {\n            \"url\": \"http://localhost:18789/api/skills/self-improving-agent/execute\",\n            \"method\": \"POST\",\n            \"sendBody\": true,\n            \"bodyParameters\": {\n              \"parameters\": [\n                {\n                  \"name\": \"task\",\n                  \"value\": \"分析以下性能數據並提出優化建議:\\n\\n使用時段: {{$json.period.start}} 至 {{$json.period.end}}\\n總請求數: {{$json.metrics.totalRequests}}\\n平均響應時間: {{$json.metrics.avgResponseTime}}秒\\n錯誤率: {{$json.metrics.errorRate * 100}}%\\nToken用量: 輸入{{$json.metrics.tokenUsage.input}} / 輸出{{$json.metrics.tokenUsage.output}}\\n費用: ${{$json.metrics.cost}}\\n\\n發現的問題:\\n{{#each $json.issues}}- {{this.description}} (發生{{this.count}}次)\\n{{/each}}\\n\\n請提供具體的優化建議。\"\n                }\n              ]\n            }\n          }\n        },\n        {\n          \"name\": \"執行優化建議\",\n          \"type\": \"n8n-nodes-base.function\",\n          \"position\": [850, 300],\n          \"parameters\": {\n            \"jsCode\": \"const response = items[0].json;\\nconst suggestions = response.suggestions || [];\\n\\n// 解析優化建議\\nconst optimizations = [];\\n\\nfor (const suggestion of suggestions) {\\n  if (suggestion.priority === 'high' && suggestion.automated) {\\n    optimizations.push({\\n      action: suggestion.action,\\n      description: suggestion.description,\\n      estimatedImpact: suggestion.estimatedImpact\\n    });\\n  }\\n}\\n\\nreturn [{ json: { optimizations } }];\"\n          }\n        }\n      ]\n    }\n  }\n}
