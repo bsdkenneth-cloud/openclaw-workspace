@@ -1,6 +1,17 @@
 # Create GitHub repository
+# Note: GitHub Token should be passed as parameter or from environment variable
 
-$token = "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"
+param(
+    [string]$Token = $env:GITHUB_TOKEN
+)
+
+if (-not $Token) {
+    Write-Host "Error: GitHub Token is required"
+    Write-Host "Set environment variable: `$env:GITHUB_TOKEN = 'your_token'"
+    Write-Host "Or pass as parameter: .\create-repo.ps1 -Token 'your_token'"
+    exit 1
+}
+
 $repoName = "openclaw-workspace"
 
 $headers = @{
